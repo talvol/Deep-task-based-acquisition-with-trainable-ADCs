@@ -1,5 +1,5 @@
 """
-Deep task-based acquisition with trainable ADCs
+POWER-AWARE TASK-BASED LEARNING OF NEUROMORPHIC ADCS
 """
 
 import numpy as np
@@ -17,7 +17,7 @@ from os.path import join
 from sklearn.model_selection import train_test_split
 
 """
-Task: 
+Task: MNIST dataset image classification
 """
 
 "Global parameters definition"
@@ -37,6 +37,15 @@ learning_rates = [0.001]
 train_size = 50000
 valid_size = 10000
 test_size = 10000
+
+
+"""
+createMatrixP ensures there's no overlap between levels in a quantization process.
+Overlapping levels can cause a loss of resolution.
+The function creates a matrix P and a vector b.
+To ensure that we don't have overlap we will multiply P by weights W,
+and make sure that the results are larger than vector b. This guarantees non-overlapping levels.
+"""
 
 
 def createMatrixP():
@@ -86,20 +95,9 @@ def complex_matrix_norm(matrix):
     return torch.mean(entry_norm)
 
 
-"""The function iterates over the bits of the quantized weights, calculating the power consumption at each bit. 
-The power is affected by three main contributors, the input voltage, the reference voltage and the quantized weights.
-The output of the function is the total power consumption of the neural network.
-Input:
-Vin - Input voltages
-W - The relative weight of each input bit to the output bit
-Q - The quantized input in bit representation
-bits - The number of bits
-Vref - The reference voltage
-Rf - The resistance value of the feedback resistor used in the ADC circuit
-Output: 
-power_sum - The total power consumption of the network"""
-
-"""Quantization using adaptive weights:"""
+"""
+quantizerOut takes as input an analog input y and the weights for the SAR ADC and outputs the quantized vector q
+"""
 
 
 def quantizerOut(y, W_tensor):
@@ -140,13 +138,13 @@ def standardization(train, valid, test):
     return train, valid, test
 
 
-def scale_to_vdd(data, min_val, max_val):
-    data_std = (data - min_val) / (max_val - min_val)
-    data_scaled = data_std * Vdd
-    return data_scaled
-
-
-"""Analog Layer:"""
+"""
+Analog Layer:
+The AnalogLayer class processes MNIST images represented as long vectors through a DCT.
+The parameter phi can either be trainable or fixed, and a weight matrix, A, derived from the input length.
+During the forward pass, the image is multiplied with a phase-shifted cosine matrix and the weight matrix,
+producing the analog output y.
+"""
 
 
 class AnalogLayer(torch.nn.Module):
@@ -173,7 +171,8 @@ class AnalogLayer(torch.nn.Module):
         return y.type(torch.FloatTensor)
 
 
-"""Quantization Layer:
+"""
+Quantization Layer:
 This function takes as input a tensor y and the number of bits and returns a quantized version of y the 
 static power of the quantization process.
 The quantization is implemented using a successive approximation. 
@@ -189,7 +188,8 @@ bits - number of bits
 p - number of ADCs
 Output:
 q - quantized signal
-p - total power consumption of the ADC"""
+Q - quantized signal in bits format
+"""
 
 
 class QuantizationLayer(nn.Module):
@@ -225,6 +225,13 @@ class QuantizationLayer(nn.Module):
         return q.type(torch.FloatTensor), Q.type(torch.FloatTensor)
 
 
+"""
+True Quantization Layer:
+Act similar as the original quantization function but instead of using the "soft to hard" approach it uses a real
+sign function in the process of building the digital output.
+"""
+
+
 class TrueQuantizationLayer(nn.Module):
     def __init__(self, W_tensor, num_of_bits, num_of_adcs=p):
         super(TrueQuantizationLayer, self).__init__()
@@ -253,7 +260,11 @@ class TrueQuantizationLayer(nn.Module):
         return q.type(torch.FloatTensor), Q.type(torch.FloatTensor)
 
 
-"""Digital Processing:"""
+"""
+Digital Processing:
+The input to the network expects a tensor shape according to the number of ADCs and time samples.
+The output is later used for classification tasks when combined with a cross-entropy loss function.
+"""
 
 
 class digitalDNN(nn.Module):
@@ -269,7 +280,10 @@ class digitalDNN(nn.Module):
         return y
 
 
-"""AGC:"""
+"""
+The AGC implements an automatic gain control module.
+It first normalizes the input signal then scales and shifts it within a voltage range defined by Vdd.
+"""
 
 
 class AGC(nn.Module):
@@ -284,7 +298,10 @@ class AGC(nn.Module):
         return x
 
 
-"""Full Layer:"""
+"""
+Full Layer:
+The full layer includes all the modules described above and will be used to train them all together
+"""
 
 
 class FullNet(nn.Module):
@@ -315,7 +332,21 @@ class FullNet(nn.Module):
         return x, Q, Vin
 
 
-"""Power:"""
+"""
+Power:
+The function iterates over the bits of the quantized weights, calculating the power consumption at each bit. 
+The power is affected by three main contributors, the input voltage, the reference voltage and the quantized weights.
+The output of the function is the total power consumption of the neural network.
+Input:
+Vin - Input voltages
+W - The relative weight of each input bit to the output bit
+Q - The quantized input in bit representation
+bits - The number of bits
+Vref - The reference voltage
+Rf - The resistance value of the feedback resistor used in the ADC circuit
+Output: 
+power_sum - The total power consumption of the network
+"""
 
 
 def synpPower(Vin, W_tensor, Q):
@@ -362,10 +393,11 @@ def totalPower(Vin, W_tensor, Q):
     return total_power, synapsePower, integrationPower
 
 
-"""Plot quantization levels:"""
-"""Plots the quantizer levels for the given input and quantized signals.
+"""
+Plots the quantizer levels for the given input and quantized signals.
 x: The input signal values
-quan_x: The corresponding quantized signal values"""
+quan_x: The corresponding quantized signal values
+"""
 
 
 def plotQuant(x, quan_x):
