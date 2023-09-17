@@ -4,7 +4,6 @@
 
 trainable_analog = True  # Dictates if the analog layer should be trained as well or not  
 trainable_adc = True  # Dictates if we want a neuromorphic ADC or a uniform ADC  
-
 q_bits = 4  # Number of bits  
 number_of_epochs = 20  # Number of epochs  
 p = 3     # Number of ADCs  
@@ -31,11 +30,11 @@ In order to test your own set of parameters you can choose any desired value for
 In order to load an existing model you need to set "load_trained_model" to "True"  
 
 
-##### <u>**Existing model structure explanation:**</u>  
+#### <u>**Existing model structure explanation:**</u>  
 
 Before testing an existing model please align the global parameters based on the naming structure of the trained model  
 
-###### <u>**Example 1:**</u>  
+#### <u>**Example 1:**</u>  
 "Synthetic_model_onlydig_342_0_0_2_1"  
 "onlydig" means that trainable_analog & trainable_adc both set to False  
 seed = 342  
@@ -44,7 +43,7 @@ beta = 0
 q_bits = 2  
 p = 1  
 
-###### <u>**Example 2:**</u>  
+#### <u>**Example 2:**</u>  
 "Synthetic_model_dig_and_analog_342_0_0_2_3"  
 "dig_and_analog" means that trainable_analog = True and trainable_adc = False  
 seed = 342  
@@ -53,7 +52,7 @@ beta = 0
 q_bits = 2  
 p = 3  
 
-###### <u>**Example 3:**</u>  
+#### <u>**Example 3:**</u>  
 "Synthetic_model_342_150_300_4_3"  
 trainable_analog = True  
 trainable_adc = True  
