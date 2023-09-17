@@ -22,9 +22,9 @@ Task: MNIST dataset image classification
 
 "Global parameters definition"
 trainable_analog = False
-trainable_adc = False
+trainable_adc = True
 q_bits = 4  # Number of bits
-number_of_epochs = 120
+number_of_epochs = 3
 p = 28  # Number of ADCs
 Vdd = 1  # Full scale voltage
 Vr = Vdd / (2 ** q_bits)  # Writing voltage
@@ -37,7 +37,7 @@ learning_rates = [0.001]
 train_size = 50000
 valid_size = 10000
 test_size = 10000
-
+load_trained_model = False  # Dictates if to train for a new model or load an exisiting model
 
 """
 createMatrixP ensures there's no overlap between levels in a quantization process.
@@ -845,29 +845,36 @@ test_loader = DataLoader(test_data, batch_size=batch_sizes[0], shuffle=True)
 
 
 network = FullNet(q_bits)
+trained_model = FullNet(q_bits)
 
 results = []
 test_power = []
 
-for batch_size in batch_sizes:
-    for learning_rate in learning_rates:
-        train_err, train_acc, valid_err, valid_acc, final_net, power_epoch, total_power, synp_power, int_power = \
-            run_experiment(batch_size, learning_rate, x_train, x_valid, s_train, s_valid, train_loader, valid_loader)
-        results.append({
-            "batch_size": batch_size,
-            "learning_rate": learning_rate,
-            "train_err": train_err,
-            "train_acc": train_acc,
-            "valid_err": valid_err,
-            "valid_acc": valid_acc
-        })
-plotGraphs("Training & Validation", results)
+if not load_trained_model:
+    for batch_size in batch_sizes:
+        for learning_rate in learning_rates:
+            train_err, train_acc, valid_err, valid_acc, final_net, power_epoch, total_power, synp_power, int_power = \
+                run_experiment(batch_size, learning_rate, x_train, x_valid, s_train, s_valid, train_loader, valid_loader)
+            results.append({
+                "batch_size": batch_size,
+                "learning_rate": learning_rate,
+                "train_err": train_err,
+                "train_acc": train_acc,
+                "valid_err": valid_err,
+                "valid_acc": valid_acc
+            })
+    plotGraphs("Training & Validation", results)
 
-# Print Power vs Epoch
-if trainable_adc:
-    plotPower(power_epoch, total_power, "Total power VS # of Epochs")
-    plotPower(power_epoch, synp_power, "Synapse power VS # of Epochs")
-    plotPower(power_epoch, int_power, "Integration power VS # of Epochs")
+    # Print Power vs Epoch
+    if trainable_adc:
+        plotPower(power_epoch, total_power, "Total power VS # of Epochs")
+        plotPower(power_epoch, synp_power, "Synapse power VS # of Epochs")
+        plotPower(power_epoch, int_power, "Integration power VS # of Epochs")
 
 # Test
-test(final_net, batch_sizes[0], test_loader, x_test, s_test)
+"""If load_trained_model = TRUE, we must change "filename" to an existing model before testing"""
+if load_trained_model:
+    trained_model.load_state_dict(torch.load('filename'))
+    test(trained_model, batch_sizes[0], test_loader, x_test, s_test)
+else:
+    test(final_net, batch_sizes[0], test_loader, x_test, s_test)
