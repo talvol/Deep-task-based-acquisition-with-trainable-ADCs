@@ -37,5 +37,5 @@ load_data(file_path_data=r"PLACE HERE DATA PATH FOR HF RADIO DATASET .NPY FILE",
               file_path_labels=r"PLACE HERE DATA PATH FOR HF RADIO LABELS .CSV FILE")
 ```
 
-### 5. Thesis**
+### 5. **Thesis**
 This file contains the main function for running the experiment.
