@@ -8,4 +8,4 @@ This project includes two distinct works in the field of task-based learning for
 
 2. **Noisy Scenario**: In the expanded version of the project, we introduced noise during the inference phase and explored methods to improve system performance under noisy conditions. By utilizing noisy training and knowledge distillation, we achieved significant improvements. This scenario includes three scripts demonstrating our system's superior performance compared to traditional uniform ADCs, even in noisy environments.
 
-   ![Noisy Case](noisy.png)
+   ![noisy](https://github.com/user-attachments/assets/22c27857-0c88-419e-8f2e-1aaaa74b4009)
