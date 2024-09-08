@@ -7,3 +7,5 @@ This project includes two distinct works in the field of task-based learning for
    ![system1](https://github.com/talvol/Deep-task-based-acquisition-with-trainable-ADCs/assets/143577557/98866e46-79a5-441c-a929-118439661a87)
 
 2. **Noisy Scenario**: In the expanded version of the project, we introduced noise during the inference phase and explored methods to improve system performance under noisy conditions. By utilizing noisy training and knowledge distillation, we achieved significant improvements. This scenario includes three scripts demonstrating our system's superior performance compared to traditional uniform ADCs, even in noisy environments.
+
+   ![Noisy Case](images/noisy.png)
