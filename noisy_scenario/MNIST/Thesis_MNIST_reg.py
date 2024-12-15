@@ -26,14 +26,14 @@ trainable_analog = True
 trainable_adc = True
 noisy_inference = True
 noisy_training = True
-distillation_training = True
+distillation_training = False
 q_bits = 4  # Number of bits
 p = 7  # Number of ADCs
 noise_sigma = 0.3
 beta = 150  # Power accuracy trade-off
 gamma = 1  # Weight regularization
-alpha = 0.05  # Distillation parameter
-T = 2  # Teacher model temperature parameter
+alpha = 0  # Distillation parameter
+T = 0  # Teacher model temperature parameter
 eta = 0  # L2 parameter
 
 Vdd = 1  # Full scale voltage
@@ -43,14 +43,14 @@ Rf = 45e3  # Reference resistor
 seed = 10
 torch.manual_seed(seed)  # Seed for data creation
 np.random.seed(seed)
-number_of_epochs = 120
+number_of_epochs = 100
 batch_sizes = [32]
 learning_rates = [0.001]
 train_size = 50000
 valid_size = 10000
 test_size = 10000
+# Set the teacher file name for distillation
 if distillation_training:
-    # filename = f"Teacher_MNIST_{gamma}_{beta}_{q_bits}_{p}.pth"
     teacher_filename = f"Teacher_MNIST_0_1_1_0_4_7.pth"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
